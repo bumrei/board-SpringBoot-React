@@ -1,15 +1,19 @@
 package org.denny.boardprac.repository.search;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.JPQLQuery;
 import lombok.extern.log4j.Log4j2;
 import org.denny.boardprac.entity.Board;
 import org.denny.boardprac.entity.QBoard;
+import org.denny.boardprac.entity.QReply;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import javax.persistence.Query;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Log4j2
 public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardSearch {
@@ -68,5 +72,56 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements BoardS
         // 방법 3 -----------------------------------------------------------------------------------------------
 
 //        log.info(this.getQuerydsl().createQuery(QBoard.board).fetch());
+    }
+
+    @Override
+    public Page<Object[]> searchWithReplyCount(char[] typeArr, String keyword, Pageable pageable) {
+
+        log.info("-----------------searchWithReplyCount");
+        log.info("-----------------searchWithReplyCount");
+
+        // 1. EntityManager를 이용해 QUery
+
+        // 2. getQuerydsl() 을 이용하는 방식식
+                // -this.getEntityManager().createQuery()
+
+        // 3. Query 를 만들때는 Q도메인 -- 값을 뽑을때는 엔티티 타입 / 값 -- Q도메인은 쿼리를 위한 객체
+        QBoard qBoard = QBoard.board;
+        QReply qReply = QReply.reply;
+
+        JPQLQuery<Board> query = from(qBoard);
+        query.leftJoin(qReply).on(qReply.board.eq(qBoard));
+        query.groupBy(qBoard);
+
+        if (typeArr != null && typeArr.length > 0) {
+
+            BooleanBuilder condition = new BooleanBuilder();
+
+            for (char type: typeArr) {
+                if (type == 'T') {
+                    condition.or(qBoard.title.contains(keyword));
+                } else if (type == 'C') {
+                    condition.or(qBoard.content.contains(keyword));
+                } else if (type =='W') {
+                    condition.or(qBoard.writer.contains(keyword));
+                }
+            }
+            query.where(condition);
+        }
+
+        JPQLQuery<Tuple> selectQuery = query.select(qBoard.bno, qBoard.title, qBoard.writer, qBoard.regDate, qReply.count());
+
+        this.getQuerydsl().applyPagination(pageable, selectQuery);
+
+        log.info(selectQuery);
+
+        List<Tuple> tupleList = selectQuery.fetch(); // fetch 라는게 실제로 데이터를 로딩해오는 것. fetch = 가져오기
+        // 이 fetch 라는 작업이 이루어질때 정말 select 작업, 진짜 sql 이 날라온다.
+
+        long totalCount = selectQuery.fetchCount();
+
+        List<Object[]> arr = tupleList.stream().map(tuple -> tuple.toArray()).collect(Collectors.toList());
+
+        return new PageImpl<>(arr, pageable, totalCount);
     }
 }

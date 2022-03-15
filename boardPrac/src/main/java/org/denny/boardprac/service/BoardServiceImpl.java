@@ -3,6 +3,7 @@ package org.denny.boardprac.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.denny.boardprac.dto.BoardDTO;
+import org.denny.boardprac.dto.BoardListDTO;
 import org.denny.boardprac.dto.PageRequestDTO;
 import org.denny.boardprac.dto.PageResponseDTO;
 import org.denny.boardprac.entity.Board;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -53,6 +55,33 @@ public class BoardServiceImpl implements BoardService {
         long totalCount = result.getTotalElements();
 
         return new PageResponseDTO<>(pageRequestDTO, (int) totalCount, dtoList);
+    }
+
+    @Override
+    public PageResponseDTO<BoardListDTO> getListWithReplyCount(PageRequestDTO pageRequestDTO) {
+
+        char[] typeArr = pageRequestDTO.getTypes();
+        String keyword = pageRequestDTO.getKeyword();
+
+
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1,
+                pageRequestDTO.getSize(),
+                Sort.by("bno").descending());
+
+        Page<Object[]> result = boardRepository.searchWithReplyCount(typeArr, keyword, pageable);
+
+        List<BoardListDTO> dtoList = result.get().map(objects -> {
+            BoardListDTO listDTO = BoardListDTO.builder()
+                    .bno((Long) objects[0])
+                    .title((String) objects[1])
+                    .writer((String) objects[2])
+                    .regDate((LocalDateTime) objects[3])
+                    .replyCount((Long) objects[4])
+                    .build();
+            return listDTO;
+        }).collect(Collectors.toList());
+
+        return new PageResponseDTO<>(pageRequestDTO, (int)result.getTotalElements(), dtoList);
     }
 
     @Override
