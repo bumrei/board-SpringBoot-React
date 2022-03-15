@@ -6,6 +6,10 @@ import org.denny.boardprac.entity.Reply;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -61,6 +65,44 @@ public class ReplyRepositoryTests {
         List<Reply> replyList = replyRepository.findReplyByBoard_BnoOrderByRno(bno);
 
         replyList.forEach(reply -> log.info(reply));
+    }
+
+    @Test
+    public void testListOfBoard() {
+
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("rno").descending());
+
+        Page<Reply> result = replyRepository.getListByBno(197L, pageable);
+
+        log.info(result.getTotalElements());
+        result.get().forEach(ia -> log.info(ia));
+
+    }
+
+    @Test
+    public void testCountOfBoard() {
+
+        Long bno = 195L;
+
+        int count = replyRepository.getReplyCountOfBoard(bno);
+
+        int lastPage = (int)(Math.ceil(count/10.0));
+
+//        if (count == 0) {
+//            lastPage = 1;
+//        }
+
+        Pageable pageable = PageRequest.of(lastPage <= 0 ? 0 : lastPage -1, 10);
+
+        Page<Reply> result = replyRepository.getListByBno(bno, pageable);
+
+        log.info("last Page :" + result.getTotalPages());
+        log.info("Total :" + result.getTotalElements());
+
+        result.get().forEach(reply -> {
+            log.info(reply);
+        });
+
     }
 
 
