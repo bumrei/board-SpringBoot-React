@@ -13,24 +13,24 @@
             <div class="input-group mb-3">
                 <span class="input-group-text">Bno</span>
                 <input type="text" name="bno" class="form-control" readonly
-                       th:value="${dto.bno}"  >
+                       th:value="${dto.bno}">
             </div>
             <div class="input-group mb-3">
                 <span class="input-group-text">Title</span>
                 <input type="text" name="title" class="form-control" readonly
-                       th:value="${dto.title}"   >
+                       th:value="${dto.title}">
             </div>
 
             <div class="input-group mb-3">
                 <span class="input-group-text">Writer</span>
-                <input type="text" name="writer" class="form-control"  readonly
+                <input type="text" name="writer" class="form-control" readonly
                        th:value="${dto.writer}">
             </div>
 
             <div class="input-group mb-3">
                 <span class="input-group-text">RegDate</span>
                 <input type="text" name="regDate" class="form-control" readonly
-                       th:value="${#temporals.format(dto.regDate, 'yyyy/MM/dd HH:mm:ss')}" >
+                       th:value="${#temporals.format(dto.regDate, 'yyyy/MM/dd HH:mm:ss')}">
             </div>
 
             <div class="input-group mb-3">
@@ -41,7 +41,8 @@
 
             <div class="input-group">
                 <span class="input-group-text">Content</span>
-                <textarea class="form-control" aria-label="With textarea" name="content" rows="4">[[${dto.content}]]</textarea>
+                <textarea class="form-control" aria-label="With textarea" name="content"
+                          rows="4">[[${dto.content}]]</textarea>
             </div>
 
             <div class="my-4">
@@ -55,12 +56,37 @@
             </div>
         </div>
     </div>
+    <!--    end cart-->
+
+    <div class="card">
+        <div class="card-header">Replies</div>
+        <div class="card-body">
+            <ul class="list-group replyUl">
+
+            </ul>
+            <div class="card-body">
+                <ul class="pagination">
+
+                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+
 </div>
 
-<th:block  layout:fragment="script">
+<th:block layout:fragment="script">
 
     <script th:inline="javascript">
-        function modify(bno){
+        function modify(bno) {
 
             const page = [[${pageRequestDTO.page}]]
             const size = [[${pageRequestDTO.size}]]
@@ -69,15 +95,15 @@
 
             let searchQuery = ''
 
-            if(type && keyword){
+            if (type && keyword) {
                 searchQuery += `&type=${type}&keyword=${keyword}`
             }
 
-            self.location=`/board/modify?bno=${bno}&page=${page}&size=${size}`+searchQuery
+            self.location = `/board/modify?bno=${bno}&page=${page}&size=${size}` + searchQuery
 
         }
 
-        function moveList(){
+        function moveList() {
 
             const page = [[${pageRequestDTO.page}]]
             const size = [[${pageRequestDTO.size}]]
@@ -86,13 +112,68 @@
 
             let searchQuery = ''
 
-            if(type && keyword){
+            if (type && keyword) {
                 searchQuery += `&type=${type}&keyword=${keyword}`
             }
 
-            self.location=`/board/list?page=${page}&size=${size}` + searchQuery
+            self.location = `/board/list?page=${page}&size=${size}` + searchQuery
 
         }
+
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script th:inline="javascript">
+
+        const bno = [[${dto.bno}]]
+
+        async function getList(pageNum) {
+
+            const response = await axios.get(`/replies/list/${bno}?page=${pageNum}`)
+            const replyPageResponse = response.data
+
+            console.log(replyPageResponse);
+
+            const dtoList = replyPageResponse.dtoList;
+
+            let str = "";
+
+            for (const reply of dtoList) {
+                console.log(reply);
+                str += "<li class='list-group-item dclassName justify-content-between align-items-center'>"
+                str += `<div><span>${reply.rno} --- ${reply.replyText}</span></div>`
+                str += "</li>"
+
+            }
+
+            document.querySelector(".replyUl").innerHTML = str
+
+            const pagination = document.querySelector(".pagination")
+            let pageStr = "";
+
+            // prev
+            if (replyPageResponse.prev) {
+                pageStr += `<li class="page-item"><a class="page-link" href="javascript:getList(${replyPageResponse.start - 1})" tabindex="-1">Previous</a></li>`
+            }
+
+            // num
+            for (let i = replyPageResponse.start; i <= replyPageResponse.end; i++) {
+                pageStr += `<li class="page-item ${i == replyPageResponse.page ? "active" : ""}"><a class="page-link" href="javascript:getList(${i})" tabindex="-1">${i}</a></li>`
+            }
+
+            // next
+            if (replyPageResponse.next) {
+                pageStr += `<li class="page-item"><a class="page-link" href="javascript:getList(${replyPageResponse.end + 1})" tabindex="-1">next</a></li>`
+            }
+
+            pagination.innerHTML = pageStr;
+
+
+        }
+
+
+        getList(-1);
 
     </script>
 
