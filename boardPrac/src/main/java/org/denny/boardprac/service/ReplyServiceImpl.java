@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Log4j2
@@ -62,18 +63,35 @@ public class ReplyServiceImpl implements ReplyService {
     @Override
     public Long register(ReplyDTO replyDTO) {
 
-//        Board board = Board.builder().bno(replyDTO.getBno()).build();
-//
-//        log.info("=============================" + board);
-
+        // replyDTO 는 bno 이고 Reply 는 Board 라서 mapping 이 잘 안될까봐 걱정했는데
+        // bno 를 modelMapper 가 자동으로 mapping 해서 Reply 에 Board.bno 만 들어간 상태로 mapping 을 깔끔하게 시켜준다.
         Reply reply = modelMapper.map(replyDTO, Reply.class);
-
-//        log.info(reply);
-//        log.info(reply.getBoard());
 
         replyRepository.save(reply);
 
         return reply.getRno();
+
+    }
+
+    @Override
+    public PageResponseDTO<ReplyDTO> remove(Long bno, Long rno, PageRequestDTO pageRequestDTO) {
+
+        replyRepository.deleteById(rno);
+
+        return getListOfBoard(bno, pageRequestDTO);
+    }
+
+    @Override
+    public PageResponseDTO<ReplyDTO> modify(ReplyDTO replyDTO, PageRequestDTO pageRequestDTO) {
+
+        // The value type coming up will be optional. So .orElseThrow() should be put like that
+        Reply reply = replyRepository.findById(replyDTO.getRno()).orElseThrow();
+
+        reply.setText(replyDTO.getReplyText());
+
+        replyRepository.save(reply);
+
+        return getListOfBoard(replyDTO.getBno(), pageRequestDTO);
     }
 
     private int calcLastPage(Long bno, double size) {
