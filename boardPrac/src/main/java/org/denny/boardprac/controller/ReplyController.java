@@ -8,6 +8,7 @@ import org.denny.boardprac.dto.ReplyDTO;
 import org.denny.boardprac.service.ReplyService;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequiredArgsConstructor
 @Log4j2

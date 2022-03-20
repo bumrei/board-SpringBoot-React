@@ -64,7 +64,8 @@ public class BoardServiceImpl implements BoardService {
         String keyword = pageRequestDTO.getKeyword();
 
 
-        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1,
+        Pageable pageable = PageRequest.of(
+                pageRequestDTO.getPage() - 1,
                 pageRequestDTO.getSize(),
                 Sort.by("bno").descending());
 
