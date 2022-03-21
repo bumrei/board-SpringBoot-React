@@ -1,26 +1,30 @@
 import React, {useState} from 'react';
-import ShowName from "./ShowName";
-import OddEven from "./OddEven";
+import Dice from "./Dice";
+
+const initState = {value : 1}
 
 const HelloWorld = () => {
 
     const name = "Hong Gil Dong"
-    const [num, setNum] = useState(10)
+    const [num, setNum] = useState(initState)
 
+    const change = () => {
+
+        const newNum = {value : num.value + 1}
+
+        setNum(newNum)
+    }
 
     return (
         <>
+            <Dice></Dice>
             <div>
                 <h1>Hello World</h1>
             </div>
             <div>
-                <ShowName name={name} num={num}></ShowName>
-                <OddEven num={num}></OddEven>
-                <OddEven num={num}></OddEven>
-                <OddEven num={num}></OddEven>
-                <OddEven num={num}></OddEven>
-                <OddEven num={num}></OddEven>
-                <button onClick={() => setNum(num + 1)}>Change</button>
+                <h1>{num.value}</h1>
+
+                <button onClick={() => change()}>Change</button>
             </div>
         </>
     );
