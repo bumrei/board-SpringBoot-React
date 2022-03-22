@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import Dice from "./Dice";
+import CountContainer from "./counter/CountContainer";
+import KioskContainer from "./kiosk/KioskContainer";
 
 const initState = {value : 1}
 
@@ -17,15 +19,7 @@ const HelloWorld = () => {
 
     return (
         <>
-            <Dice></Dice>
-            <div>
-                <h1>Hello World</h1>
-            </div>
-            <div>
-                <h1>{num.value}</h1>
-
-                <button onClick={() => change()}>Change</button>
-            </div>
+            <KioskContainer></KioskContainer>
         </>
     );
 };
