@@ -2,6 +2,9 @@ import React, {useState} from 'react';
 import Dice from "./Dice";
 import CountContainer from "./counter/CountContainer";
 import KioskContainer from "./kiosk/KioskContainer";
+import CountingContainer from "./CountPrac/CountingContainer";
+import Middle from "./Middle";
+import ContinuousSlider from "./materials/ContinuousSlider";
 
 const initState = {value : 1}
 
@@ -19,7 +22,10 @@ const HelloWorld = () => {
 
     return (
         <>
-            <KioskContainer></KioskContainer>
+            <Middle></Middle>
+            <ContinuousSlider></ContinuousSlider>
+
+
         </>
     );
 };
