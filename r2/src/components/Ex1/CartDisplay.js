@@ -6,6 +6,15 @@ const CartDisplay = ({cart}) => {
     console.log("hahaha")
     console.log("hahaha")
     console.log("hahaha")
+    console.log("hahaha")
+    console.log("hahaha")
+    console.log("hahaha")
+    console.log("hahaha")
+    console.log("hahaha")
+    console.log("hahaha")
+    console.log("hahaha")
+    console.log("hahaha")
+    console.log("hahaha")
 
     const list = cart.map((item, idx) => <li key={idx}>{item.pno} - {item.pname} - {item.price}</li>)
 
